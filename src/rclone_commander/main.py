@@ -1,5 +1,21 @@
 #!/usr/bin/env python3
-"""rclone-commander - A dual-pane TUI file manager for rclone."""
+"""rclone-commander - A dual-pane TUI file manager for rclone.
+
+Copyright (C) 2025 Miklos Mukka Szel <contact@miklos-szel.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import os
 import logging
 import threading
@@ -62,15 +78,21 @@ class FileListView(DataTable):
         Binding("right", "page_down", "Page Down", show=False),
     ]
 
-    def __init__(self, remote: str = "", rclone_path: str = "", config_path: str = "", extra_flags: str = "", *args, **kwargs):
+    def __init__(self, remote: str = "", rclone_path: str = "", config_path: str = "", extra_flags: str = "", local_default_path: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.remote_name = remote
-        # For local remote, start at home directory with absolute path
+        # For local remote, use configured default path (empty = home, / = root, or custom path)
         # This ensures rclone interprets paths correctly
         if remote.lower() == "local":
             import os
-            self.current_path = os.path.expanduser("~")
-            logger.debug(f"FileListView.__init__: local remote, starting at '{self.current_path}'")
+            if not local_default_path:
+                # Empty means home directory
+                self.current_path = os.path.expanduser("~")
+                logger.debug(f"FileListView.__init__: local remote, starting at home '{self.current_path}'")
+            else:
+                # Use configured path (could be / for root, or any other path)
+                self.current_path = local_default_path
+                logger.debug(f"FileListView.__init__: local remote, starting at configured path '{self.current_path}'")
         else:
             self.current_path = ""
         self.entries: List[rclone_wrapper.FileEntry] = []
@@ -83,7 +105,7 @@ class FileListView(DataTable):
         self.cursor_type = "row"
         self._last_dir_entered = ""  # Track last directory we entered
         # Add columns in __init__ so they're ready before mount
-        # Name column takes most of the space, Size column gets fixed width
+        # Name column takes most of the space, Size column gets fixed width on right
         self.add_column("Name", width=None)
         self.add_column("Size", width=15)
 
@@ -139,8 +161,9 @@ class FileListView(DataTable):
         self.clear()
 
         # Add parent directory if not at root
+        # For local filesystem, root is "/"; for remotes, root is ""
         offset = 0
-        if self.current_path:
+        if self.current_path and self.current_path != "/":
             self.add_row("[cyan]..[/cyan]", "")
             logger.debug("set_entries: Added '..' row at position 0")
             offset = 1
@@ -164,8 +187,8 @@ class FileListView(DataTable):
             else:
                 size = rclone_wrapper.format_size(entry.size, entry.is_dir)
                 name_text = entry.name
-                # Right-align the size column
-                size_text = Text(size, style="dim", justify="right")
+                # Left-align the size column (fixed 8-char width)
+                size_text = Text(size, style="dim", justify="left")
                 self.add_row(name_text, size_text)
                 logger.debug(f"set_entries: Added file '{entry.name}' at row {row_num} (index {i})")
             row_num += 1
@@ -235,7 +258,8 @@ class FileListView(DataTable):
             return
 
         # Handle ".." (parent directory)
-        if self.current_path and cursor_row == 0:
+        # Only show ".." if not at root (root is "/" for local, "" for remotes)
+        if self.current_path and self.current_path != "/" and cursor_row == 0:
             # Remember the directory name we're leaving
             dir_parts = self.current_path.rstrip('/').split('/')
             if dir_parts:
@@ -254,7 +278,7 @@ class FileListView(DataTable):
             return
 
         # Navigate into directory
-        offset = 1 if self.current_path else 0
+        offset = 1 if (self.current_path and self.current_path != "/") else 0
         actual_index = cursor_row - offset
 
         if 0 <= actual_index < len(self.entries):
@@ -286,10 +310,11 @@ class FileListView(DataTable):
             return
 
         # Don't allow selection on ".." row
-        offset = 1 if self.current_path else 0
+        # Offset is 1 if we're showing ".." (not at root)
+        offset = 1 if (self.current_path and self.current_path != "/") else 0
         logger.debug(f"  offset: {offset}")
 
-        if self.current_path and self.cursor_row == 0:
+        if self.current_path and self.current_path != "/" and self.cursor_row == 0:
             logger.debug("  ABORT: Cursor on '..' row")
             return
 
@@ -345,8 +370,8 @@ class FileListView(DataTable):
                 name = f"[black on white]{entry.name}[/black on white]"
             else:
                 name = entry.name
-            # Right-align the size column
-            size = Text(size_str, style="dim", justify="right")
+            # Left-align the size column (fixed 8-char width)
+            size = Text(size_str, style="dim", justify="left")
 
         logger.debug(f"_refresh_item_display: row={row_index}, name='{entry.name}', selected={'YES' if is_selected else 'NO'}")
 
@@ -363,7 +388,7 @@ class FileListView(DataTable):
         if not self.entries or self.cursor_row < 0:
             return []
 
-        offset = 1 if self.current_path else 0
+        offset = 1 if (self.current_path and self.current_path != "/") else 0
         actual_index = self.cursor_row - offset
 
         if 0 <= actual_index < len(self.entries):
@@ -375,13 +400,14 @@ class FileListView(DataTable):
 class FilePanel(Vertical):
     """A panel containing file list and path display."""
 
-    def __init__(self, remote: str = "", rclone_path: str = "", config_path: str = "", extra_flags: str = "", *args, **kwargs):
+    def __init__(self, remote: str = "", rclone_path: str = "", config_path: str = "", extra_flags: str = "", local_default_path: str = "", *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.remote = remote
         self.file_list: Optional[FileListView] = None
         self._rclone_path = rclone_path
         self._config_path = config_path
         self._extra_flags = extra_flags
+        self._local_default_path = local_default_path
 
     def compose(self) -> ComposeResult:
         """Compose the file panel."""
@@ -389,7 +415,8 @@ class FilePanel(Vertical):
             remote=self.remote,
             rclone_path=self._rclone_path,
             config_path=self._config_path,
-            extra_flags=self._extra_flags
+            extra_flags=self._extra_flags,
+            local_default_path=self._local_default_path
         )
         yield self.file_list
 
@@ -1151,6 +1178,7 @@ class RcloneCommander(App):
                 rclone_path=self.rclone_path,
                 config_path=self.config_path,
                 extra_flags=self.app_config.extra_rclone_flags,
+                local_default_path=self.app_config.local_default_path,
                 id="left-panel"
             )
             yield self.left_panel
@@ -1160,6 +1188,7 @@ class RcloneCommander(App):
                 rclone_path=self.rclone_path,
                 config_path=self.config_path,
                 extra_flags=self.app_config.extra_rclone_flags,
+                local_default_path=self.app_config.local_default_path,
                 id="right-panel"
             )
             yield self.right_panel
@@ -1584,6 +1613,12 @@ class RcloneCommander(App):
             self.update_status(f"Copied {len(entries)} item(s)")
             logger.debug(f"_do_copy_operation: Successfully copied {len(entries)} item(s)")
             refresh_panel(dst_panel, self.rclone_path, self.config_path, self.app_config.extra_rclone_flags)
+
+            # Clear selections in source panel after successful copy
+            if src_panel.file_list:
+                src_panel.file_list.selected_items.clear()
+                src_panel.file_list._refresh_all_items()
+                logger.debug("_do_copy_operation: Cleared selections in source panel")
         except Exception as e:
             # Ensure modal is dismissed on error
             self.pop_screen()
@@ -1741,6 +1776,12 @@ class RcloneCommander(App):
             logger.debug(f"_do_move_operation: Successfully moved {len(entries)} item(s)")
             refresh_panel(src_panel, self.rclone_path, self.config_path, self.app_config.extra_rclone_flags)
             refresh_panel(dst_panel, self.rclone_path, self.config_path, self.app_config.extra_rclone_flags)
+
+            # Clear selections in source panel after successful move
+            if src_panel.file_list:
+                src_panel.file_list.selected_items.clear()
+                src_panel.file_list._refresh_all_items()
+                logger.debug("_do_move_operation: Cleared selections in source panel")
         except Exception as e:
             # Ensure modal is dismissed on error
             self.pop_screen()
@@ -1893,7 +1934,7 @@ class RcloneCommander(App):
 
                 # Position cursor on the newly created directory
                 file_list = self.active_panel.file_list
-                offset = 1 if file_list.current_path else 0  # Account for ".." row
+                offset = 1 if (file_list.current_path and file_list.current_path != "/") else 0  # Account for ".." row
 
                 # Find the new directory in the entries
                 for i, entry in enumerate(file_list.entries):
@@ -2077,6 +2118,19 @@ def refresh_panel(panel: Optional[FilePanel], rclone_path: str, config_path: str
 
 def navigate_up(current_path: str) -> str:
     """Navigate up one directory level."""
+    if not current_path:
+        return ""
+
+    # Handle absolute paths (local filesystem)
+    if current_path.startswith('/'):
+        parts = current_path.rstrip('/').split('/')
+        # If we're at a top-level directory like "/Users", go to root "/"
+        if len(parts) == 2:
+            return "/"
+        # Otherwise, go up one level
+        return '/'.join(parts[:-1]) if len(parts) > 1 else "/"
+
+    # Handle relative paths (remote filesystems)
     parts = current_path.rstrip('/').split('/')
     return '/'.join(parts[:-1]) if len(parts) > 1 else ""
 

@@ -85,7 +85,20 @@ python3 -m src.rclone_commander.main
 
 ## Configuration
 
-All configuration is stored in `config/app_config.ini`. Copy and modify this file to customize your experience.
+rclone-commander includes a default configuration file bundled with the package. You can customize settings by creating your own config file.
+
+**Config file locations** (in priority order):
+1. `~/.config/rclone-cmd/app_config.ini` - User-specific config (recommended for customization)
+2. `<package>/config/app_config.ini` - Default config bundled with installation
+3. `config/app_config.ini` - Legacy location (backwards compatibility)
+
+To customize settings, copy the default config to your user directory:
+```bash
+mkdir -p ~/.config/rclone-cmd/
+cp <package-location>/config/app_config.ini ~/.config/rclone-cmd/
+# Edit with your preferred editor
+nano ~/.config/rclone-cmd/app_config.ini
+```
 
 ### General Settings
 
@@ -95,6 +108,8 @@ All configuration is stored in `config/app_config.ini`. Copy and modify this fil
 default_left_remote =
 # Default remote for right panel (leave empty for first from rclone.conf)
 default_right_remote =
+# Default starting path for local remote (leave empty for home directory, use / for root)
+local_default_path =
 # Application title
 app_title = Rclone Commander
 # Extra rclone flags for all operations
@@ -104,6 +119,10 @@ extra_rclone_flags = --transfers 6 --checkers 6
 **Default Panel Behavior:**
 - **Left panel**: Defaults to `local` filesystem
 - **Right panel**: Defaults to first remote from `rclone.conf`
+- **Local starting path**:
+  - Empty (`local_default_path =`) - Starts at user's home directory
+  - Root (`local_default_path = /`) - Starts at filesystem root, allows browsing entire system
+  - Custom (`local_default_path = /path/to/dir`) - Starts at specified directory
 
 ### Display Settings
 
@@ -200,6 +219,11 @@ port = 22
 type = b2
 account = your_account_id
 key = your_application_key
+
+#local is necessary if you want to browse your local dirs
+[local]
+type = local
+
 ```
 
 ## Multi-Select Operations
@@ -229,12 +253,16 @@ The "local" remote uses rclone's `local` backend for unified operation handling.
 - Consistent behavior across local and remote operations
 - Same progress tracking for all transfers
 - Unified path handling and error reporting
+- Full filesystem access - can navigate from root (/) to browse entire system
+- Configurable starting directory (home, root, or custom path)
 
 Configure in `~/.config/rclone/rclone.conf`:
 ```ini
 [local]
 type = local
 ```
+
+By default, the local remote starts at your home directory. To start at the filesystem root (/) or a custom directory, set `local_default_path` in `config/app_config.ini`.
 
 ## Environment Variables
 
@@ -270,7 +298,7 @@ If you see import errors:
 
 ## License
 
-MIT License - see LICENSE file for details
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 

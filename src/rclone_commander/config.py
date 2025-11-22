@@ -1,4 +1,20 @@
-"""Configuration management for rclone commander."""
+"""Configuration management for rclone commander.
+
+Copyright (C) 2025 Miklos Mukka Szel <contact@miklos-szel.com>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import os
 import configparser
 from typing import Dict, List, Optional, NamedTuple
@@ -10,6 +26,7 @@ class AppConfig(NamedTuple):
     # General
     default_left_remote: str
     default_right_remote: str
+    local_default_path: str
     app_title: str
     debug: bool
     extra_rclone_flags: str
@@ -64,19 +81,37 @@ def get_config_path() -> str:
 
 
 def get_app_config_path() -> str:
-    """Get application config file path."""
-    # Look in config/ directory first, then current directory, then ~/.config/rclone-cmd/
-    config_dir = os.path.join(os.getcwd(), 'config', 'app_config.ini')
-    if os.path.exists(config_dir):
-        return config_dir
+    """Get application config file path.
 
-    local_config = os.path.join(os.getcwd(), 'app_config.ini')
-    if os.path.exists(local_config):
-        return local_config
-
+    Search priority:
+    1. User config: ~/.config/rclone-cmd/app_config.ini (highest priority)
+    2. Package config: <package>/config/app_config.ini (bundled default)
+    3. Legacy locations: config/app_config.ini, ./app_config.ini (backwards compatibility)
+    """
+    # 1. User config directory (highest priority)
     user_config_dir = os.path.expanduser('~/.config/rclone-cmd/')
     user_config = os.path.join(user_config_dir, 'app_config.ini')
-    return user_config
+    if os.path.exists(user_config):
+        return user_config
+
+    # 2. Package config (bundled with installation)
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    package_config = os.path.join(package_dir, 'config', 'app_config.ini')
+    if os.path.exists(package_config):
+        return package_config
+
+    # 3. Legacy location - config/ directory (backwards compatibility)
+    legacy_config_dir = os.path.join(os.getcwd(), 'config', 'app_config.ini')
+    if os.path.exists(legacy_config_dir):
+        return legacy_config_dir
+
+    # 4. Legacy location - current directory (backwards compatibility)
+    legacy_local = os.path.join(os.getcwd(), 'app_config.ini')
+    if os.path.exists(legacy_local):
+        return legacy_local
+
+    # Fallback: Return package config path (will be created on first run if needed)
+    return package_config
 
 
 def load_app_config() -> AppConfig:
@@ -88,6 +123,7 @@ def load_app_config() -> AppConfig:
         # General
         'default_left_remote': '',
         'default_right_remote': 'local',
+        'local_default_path': '',  # Empty means home directory
         'app_title': 'Rclone Commander',
         'debug': 'false',
         'extra_rclone_flags': '',
@@ -138,6 +174,7 @@ def load_app_config() -> AppConfig:
             # General
             default_left_remote=parser.get('General', 'default_left_remote', fallback=defaults['default_left_remote']),
             default_right_remote=parser.get('General', 'default_right_remote', fallback=defaults['default_right_remote']),
+            local_default_path=parser.get('General', 'local_default_path', fallback=defaults['local_default_path']),
             app_title=parser.get('General', 'app_title', fallback=defaults['app_title']),
             debug=parser.getboolean('General', 'debug', fallback=defaults['debug'] == 'true'),
             extra_rclone_flags=parser.get('General', 'extra_rclone_flags', fallback=defaults['extra_rclone_flags']),
@@ -185,6 +222,7 @@ def load_app_config() -> AppConfig:
             # General
             default_left_remote=defaults['default_left_remote'],
             default_right_remote=defaults['default_right_remote'],
+            local_default_path=defaults['local_default_path'],
             app_title=defaults['app_title'],
             debug=defaults['debug'] == 'true',
             extra_rclone_flags=defaults['extra_rclone_flags'],

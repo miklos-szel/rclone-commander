@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rclone-commander"
+version = "0.1.1"
+description = "A dual-pane TUI file manager for rclone"
+readme = "README.md"
+authors = [
+    {name = "Miklos Mukka Szel", email = "contact@miklos-szel.com"}
+]
+license = {text = "GPL-3.0-or-later"}
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Filesystems",
+]
+keywords = ["rclone", "tui", "file-manager", "commander"]
+
+dependencies = [
+    "textual>=0.40.0",
+    "rich>=13.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/miklos-szel/rclone-commander"
+Repository = "https://github.com/miklos-szel/rclone-commander"
+Issues = "https://github.com/miklos-szel/rclone-commander/issues"
+
+[project.scripts]
+rclone-commander = "rclone_commander.main:main"
+
+[tool.setuptools]
+packages = ["rclone_commander"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+rclone_commander = ["config/*.ini"]
