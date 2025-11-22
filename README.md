@@ -42,7 +42,7 @@ rclone-commander/
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd rclonecommander
+cd rclone-commander
 ```
 
 2. Ensure rclone is installed:
