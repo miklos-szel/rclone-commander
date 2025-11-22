@@ -1,0 +1,69 @@
+[General]
+# Default remote to show in left panel (leave empty for first from rclone.conf)
+default_left_remote =
+# Default remote to show in right panel
+default_right_remote = local
+# Application title shown in header
+app_title = Rclone Commander
+# Enable debug logging to rclonecommander_debug.log
+debug = true
+# Extra rclone flags to add to all commands (space-separated, e.g., --progress --verbose)
+extra_rclone_flags =
+
+[Display]
+# Color scheme: dark, light, or auto
+color_scheme = dark
+# Show hidden files (files starting with .)
+show_hidden = true
+# File size display format: auto, bytes, KB, MB, GB
+size_format = auto
+# Border style: solid, double, thick, dashed, heavy, rounded
+border_style = solid
+# Active panel border color (color name or hex)
+active_border_color = accent
+# Inactive panel border color
+inactive_border_color = primary
+
+[Behavior]
+# Confirm before copy operations
+confirm_copy = true
+# Confirm before move operations
+confirm_move = true
+# Confirm before delete operations
+confirm_delete = true
+# Confirm before overwrite during copy/move
+confirm_overwrite = true
+# Follow symlinks
+follow_symlinks = false
+# Auto-refresh interval in seconds (0 to disable)
+auto_refresh = 0
+# Number of rclone log files to keep for debugging (default: 5)
+progress_log_retention = 5
+# Stats update interval for rclone progress (default: 1s)
+progress_stats_interval = 1s
+
+[KeyBindings]
+# Customize key bindings (use standard key names)
+# Note: Ctrl+C/D/Z are often captured by terminals, so we use alternatives
+quit = q
+switch_panel = tab
+swap_panels = ctrl+u
+copy = f5
+move = f6
+make_directory = f7
+delete = f8,delete
+navigate = enter
+select_remote = f10
+toggle_select = space,insert
+refresh_panel = ctrl+r
+show_dir_size = ctrl+i
+
+[StatusBar]
+# Status bar messages
+copy_label = Copy
+move_label = Move
+delete_label = Delete
+remotes_label = Remotes
+select_label = Select
+switch_label = Switch
+quit_label = Quit

@@ -1,0 +1,4 @@
+  - the copy/move/delete doesn't work, macos, maybe a problem with the f keys, choose another keys and test the function (add logging info)
+  - listing the remotes doesn't work (I only have 1 remote now)
+ - the right panel should be the local (dir where I'm)
+- when selecting a dir or file it cuts off the last character, instead of the triangle the selection should be marked with inverting the dir or files color with its background
