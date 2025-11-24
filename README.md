@@ -30,7 +30,7 @@ pip install rclone-commander
 ```
 or 
 ```
-apt/brew/yum insall pipx
+apt/brew/yum install pipx
 pipx install rclone-commander
 ```
 
