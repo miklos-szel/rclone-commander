@@ -2,7 +2,7 @@
 
 A dual-pane TUI file manager for rclone.
 
-**Version:** 0.1.2
+**Version:** 0.1.3
 **License:** GPLv3
 **Copyright:** (C) 2025 Miklos Mukka Szel <contact@miklos-szel.com>
 
@@ -128,7 +128,10 @@ type = local
 ✅ **GPLv3 licensed** with proper headers in all source files
 ✅ **Build automation** with Makefile and venv support
 
-## Recent Changes (v0.1.2)
+## Recent Changes (v0.1.3)
+
+### Version 0.1.3
+- Version bump to 0.1.3
 
 ### Version 0.1.2
 - Add Makefile for build automation with venv support

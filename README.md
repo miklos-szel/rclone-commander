@@ -1,5 +1,9 @@
 # rclone-commander
 
+<p align="center">
+  <img src="docs/img/rclone_commander_1.png" alt="rclone-commander screenshot" />
+</p>
+
 A dual-pane TUI (Text User Interface) file manager for rclone.
 
 ## Features
@@ -353,6 +357,40 @@ Contributions are welcome! Please:
 2. Create a feature branch
 3. Make your changes
 4. Submit a pull request
+
+## Changelog
+
+### Version 0.1.3 (2025-11-24)
+- Rename app_config.ini to rclone-commander.ini
+- Offer to add the [local] section to the rclone.conf upon the first run
+
+### Version 0.1.2
+- Add Makefile for build automation with venv support
+- Enhance .gitignore with comprehensive build artifact coverage
+- All build commands use isolated virtual environment
+
+### Version 0.1.1
+- Restructure config to be bundled with package
+- Config search priority: user config → package config → legacy
+- Change license from MIT to GPLv3
+- Add GPLv3 headers to all source files
+- Add configurable `local_default_path` option
+- Clear selections after successful copy/move operations
+- Improve file size column (15-char width, left-aligned)
+- Enable full filesystem browsing from root (/) for local remote
+- Proper root directory handling (hide ".." at "/")
+- Update all offset calculations for root navigation
+- Config ships with pip install (no manual setup needed)
+
+### Version 0.1.0
+- Initial release
+- Dual-pane file browser with rclone integration
+- Local and remote filesystem support
+- Multi-file selection with visual feedback
+- Copy/Move/Delete with real-time progress tracking
+- Parallel file transfers (up to 6 files simultaneously)
+- Mouse support for navigation
+- Configuration file support
 
 ## Credits
 
