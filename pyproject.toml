@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rclone-commander"
-version = "0.1.3-1"
+version = "0.1.4"
 description = "A dual-pane TUI file manager for rclone"
 readme = "README.md"
 authors = [
