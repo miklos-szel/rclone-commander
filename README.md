@@ -20,71 +20,18 @@ A dual-pane TUI (Text User Interface) file manager for rclone.
 - **Remote support** - Works with all rclone remotes
 - **Local filesystem support** - Unified local/remote access via rclone
 
-## Project Structure
-
-```
-rclone-commander/
-├── config/
-│   └── rclone-commander.ini # Application configuration
-├── src/
-│   └── rclone_commander/
-│       ├── __init__.py
-│       ├── main.py          # Main application
-│       ├── config.py        # Configuration management
-│       ├── rclone_wrapper.py # Rclone command wrappers
-│       └── progress_parser.py # Progress parsing
-├── docs/                     # Documentation
-├── rclone-commander.py      # Entry point
-├── run.sh                   # Convenience wrapper script
-├── requirements.txt         # Python dependencies
-├── rclone.conf              # Rclone remotes configuration
-└── README.md
-```
-
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd rclone-commander
+prerequisities:
+- rclone installed and setup
+
 ```
-
-2. Ensure rclone is installed:
-```bash
-which rclone
+pip install rclone-commander
 ```
-
-3. The `run.sh` script will automatically set up a virtual environment and install dependencies.
-
-## Usage
-
-### Quick Start
-
-```bash
-# Run with default remote from config
-./run.sh
-
-# Run and set specific remote
-./run.sh rclonecommander
-
-# With custom rclone config
-export RCLONE_CONFIG=/path/to/rclone.conf
-./run.sh
+or 
 ```
-
-### Manual Run
-
-```bash
-# Set up virtual environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run the application
-python3 rclone-commander.py
-
-# Or run as module
-python3 -m src.rclone_commander.main
+apt/brew/yum insall pipx
+pipx install rclone-commander
 ```
 
 ## Configuration
@@ -93,16 +40,6 @@ rclone-commander includes a default configuration file bundled with the package.
 
 **Config file locations** (in priority order):
 1. `~/.config/rclone-commander/rclone-commander.ini` - User-specific config (recommended for customization)
-2. `<package>/config/rclone-commander.ini` - Default config bundled with installation
-3. `config/rclone-commander.ini` - Legacy location (backwards compatibility)
-
-To customize settings, copy the default config to your user directory:
-```bash
-mkdir -p ~/.config/rclone-commander/
-cp <package-location>/config/rclone-commander.ini ~/.config/rclone-commander/
-# Edit with your preferred editor
-nano ~/.config/rclone-commander/rclone-commander.ini
-```
 
 ### General Settings
 
@@ -118,6 +55,8 @@ local_default_path =
 app_title = Rclone Commander
 # Extra rclone flags for all operations
 extra_rclone_flags = --transfers 6 --checkers 6
+# Internal flag: whether user has been prompted about adding [local] remote (do not modify)
+local_remote_prompted = false
 ```
 
 **Default Panel Behavior:**
@@ -319,44 +258,9 @@ By default, the local remote starts at your home directory. To start at the file
 - `RCLONE_CONFIG` - Path to rclone configuration file
 - `RCLONE_PATH` - Path to rclone executable (default: `rclone`)
 
-## Development
-
-### Code Style
-
-The project uses functional programming style with minimal OOP. Textual framework requires some class usage for UI widgets, but business logic is implemented functionally.
-
-## Troubleshooting
-
-### Empty Panels
-
-If both panels show empty:
-1. Check that your rclone.conf has valid remotes configured
-2. Ensure the remote name in config/rclone-commander.ini matches your rclone.conf
-3. Try switching to "local" remote with F10
-
-### Permission Errors
-
-If you see permission errors when listing directories:
-- Check file/directory permissions
-- Ensure rclone remote credentials are correct
-
-### Module Import Errors
-
-If you see import errors:
-- Use the `run.sh` script which handles paths correctly
-- Ensure all files are in the correct directory structure
-
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
 
 ## Changelog
 
