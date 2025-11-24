@@ -21,7 +21,7 @@ A dual-pane TUI (Text User Interface) file manager for rclone.
 ```
 rclone-commander/
 ├── config/
-│   └── app_config.ini       # Application configuration
+│   └── rclone-commander.ini # Application configuration
 ├── src/
 │   └── rclone_commander/
 │       ├── __init__.py
@@ -88,16 +88,16 @@ python3 -m src.rclone_commander.main
 rclone-commander includes a default configuration file bundled with the package. You can customize settings by creating your own config file.
 
 **Config file locations** (in priority order):
-1. `~/.config/rclone-cmd/app_config.ini` - User-specific config (recommended for customization)
-2. `<package>/config/app_config.ini` - Default config bundled with installation
-3. `config/app_config.ini` - Legacy location (backwards compatibility)
+1. `~/.config/rclone-commander/rclone-commander.ini` - User-specific config (recommended for customization)
+2. `<package>/config/rclone-commander.ini` - Default config bundled with installation
+3. `config/rclone-commander.ini` - Legacy location (backwards compatibility)
 
 To customize settings, copy the default config to your user directory:
 ```bash
-mkdir -p ~/.config/rclone-cmd/
-cp <package-location>/config/app_config.ini ~/.config/rclone-cmd/
+mkdir -p ~/.config/rclone-commander/
+cp <package-location>/config/rclone-commander.ini ~/.config/rclone-commander/
 # Edit with your preferred editor
-nano ~/.config/rclone-cmd/app_config.ini
+nano ~/.config/rclone-commander/rclone-commander.ini
 ```
 
 ### General Settings
@@ -171,33 +171,79 @@ refresh_panel = ctrl+r
 show_dir_size = ctrl+i
 ```
 
-## Keyboard Shortcuts
+## Navigation & Key Bindings
 
-Default key bindings (customizable in config):
+### Navigation Features
 
-### Navigation
-- **↑/↓ Arrow Keys** - Move cursor one item at a time
-- **←/→ Arrow Keys** - Fast scroll (10 items at a time)
-- **Enter** - Open directory or go to parent (..)
-- **Tab** - Switch between left and right panel
-- **Space/Insert** - Toggle file/directory selection
-- **Mouse Click** - Navigate to clicked item
+| Feature | Key/Action | Description |
+|---------|-----------|-------------|
+| **Cursor Movement** | Up/Down arrows | Move cursor one item at a time |
+| **Fast Scroll** | Left/Right arrows | Scroll 1/2 screen at a time |
+| **Open Directory** | Enter or Mouse click | Navigate into directories or open files |
+| **Parent Directory** | Enter on ".." | Go to parent directory (cursor positions on previous directory) |
+| **Panel Switch** | Tab | Switch focus between left and right panels |
+| **File Selection** | Space or Insert | Toggle selection with inverted colors, auto-advance cursor |
+| **Multi-Select** | Space/Insert (multiple) | Select multiple files before Copy/Move/Delete operations |
+| **Root Navigation** | Enter on "/" | Local filesystem can navigate from root to browse entire system |
+| **".." Entry** | Automatic | Always shown at top when not at root (hidden at "/" for local) |
 
-### File Operations
-- **F5** - Copy selected items to other panel (with progress)
-- **F6** - Move selected items to other panel (with progress)
-- **F7** - Create new directory
-- **F8/Delete** - Delete selected items (with progress)
-- **F10** - Show available remotes and switch
-- **ESC** - Cancel ongoing operation
+### Selection Visual Indicators
 
-### Panel Operations
-- **Ctrl+U** - Swap panels (exchange left/right contents)
-- **Ctrl+R** - Refresh current panel
-- **Ctrl+I** - Show directory size
+| Item Type | Visual Style | Description |
+|-----------|-------------|-------------|
+| **Selected Directory** | Black text on blue background | Inverted colors for visibility |
+| **Selected File** | Black text on white background | Inverted colors for visibility |
+| **Filename Display** | Full filename visible | No marker characters that cut off filenames |
+| **Auto-Clear** | After copy/move | Selections automatically cleared after successful operations |
 
-### Application
-- **Q** - Quit application
+### File Size Display
+
+| Property | Value | Description |
+|----------|-------|-------------|
+| **Column Width** | 15 characters | Fixed width, right-aligned |
+| **Content Alignment** | Left-aligned | File sizes displayed left-aligned within column |
+| **Position** | Right edge of pane | Always visible and consistently positioned |
+| **Format** | Human-readable | B, KB, MB, GB, TB, PB |
+
+### Key Bindings
+
+#### Function Keys (Primary Operations)
+
+| Key | Operation | Description |
+|-----|-----------|-------------|
+| **F5** | Copy | Copy selected files to opposite panel (with progress bar) |
+| **F6** | Move | Move selected files to opposite panel (with progress bar) |
+| **F7** | Make Directory | Create new directory (cursor positions on created directory) |
+| **F8** | Delete | Delete selected files (with progress bar) |
+| **F10** | Select Remote | Show remote selection dialog (change current panel's remote) |
+| **ESC** | Cancel | Cancel ongoing operation |
+
+#### Navigation Keys
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| **Up/Down** | Cursor movement | Move cursor one item |
+| **Left/Right** | Fast scroll | Scroll 1/2 screen at a time |
+| **Enter** | Navigate | Open directory or navigate to parent (..) |
+| **Tab** | Switch panel | Switch between left/right panels |
+| **Space/Insert** | Toggle selection | Toggle file selection with inverted colors |
+| **Mouse Click** | Navigate | Click on any row to navigate (same as Enter) |
+
+#### Panel Operations
+
+| Key | Operation | Description |
+|-----|-----------|-------------|
+| **Ctrl+U** | Swap Panels | Exchange left and right panel contents |
+| **Ctrl+R** | Refresh Panel | Refresh current panel listing |
+| **Ctrl+I** | Directory Size | Show size information for selected directory |
+
+#### Application Control
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| **Q** | Quit | Exit application |
+
+> **Note:** All key bindings are customizable in the `[KeyBindings]` section of `rclone-commander.ini`
 
 ## Rclone Configuration
 
@@ -262,7 +308,7 @@ Configure in `~/.config/rclone/rclone.conf`:
 type = local
 ```
 
-By default, the local remote starts at your home directory. To start at the filesystem root (/) or a custom directory, set `local_default_path` in `config/app_config.ini`.
+By default, the local remote starts at your home directory. To start at the filesystem root (/) or a custom directory, set `local_default_path` in `config/rclone-commander.ini`.
 
 ## Environment Variables
 
@@ -281,7 +327,7 @@ The project uses functional programming style with minimal OOP. Textual framewor
 
 If both panels show empty:
 1. Check that your rclone.conf has valid remotes configured
-2. Ensure the remote name in config/app_config.ini matches your rclone.conf
+2. Ensure the remote name in config/rclone-commander.ini matches your rclone.conf
 3. Try switching to "local" remote with F10
 
 ### Permission Errors

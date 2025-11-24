@@ -1,0 +1,31 @@
+Rename app_config.ini to rclone-commander.ini
+
+Rename the application configuration file from app_config.ini to
+rclone-commander.ini for better consistency with the project name.
+
+Changes:
+- Renamed config files in config/ and src/rclone_commander/config/
+- Updated all code references in src/rclone_commander/config.py
+  - get_app_config_path() search paths and documentation
+  - load_app_config() docstring
+  - get_user_app_config_path() path and documentation
+- Updated documentation in README.md and CLAUDE.md
+  - Config file locations and search priority
+  - Configuration examples and instructions
+  - Troubleshooting references
+- Updated run.sh script to use new filename
+- Updated all docs/ markdown files
+- Updated build artifacts (PKG-INFO, SOURCES.txt)
+
+The new config file locations are:
+1. ~/.config/rclone-commander/rclone-commander.ini (user config)
+2. <package>/config/rclone-commander.ini (bundled default)
+3. config/rclone-commander.ini (legacy location)
+
+This change improves naming consistency across the project and makes
+the config file more immediately recognizable as belonging to
+rclone-commander.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>

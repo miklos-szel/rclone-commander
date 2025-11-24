@@ -29,7 +29,7 @@
 Status bar updated to show: `^C=Copy | ^X=Move | ^D=Delete | ^R=Remotes`
 
 **Files Changed:**
-- `config/app_config.ini` (key bindings section)
+- `config/rclone-commander.ini` (key bindings section)
 - `src/rclonecommander/main.py` (status bar line 485)
 
 ### 3. Debug Logging for Operations ✓
@@ -73,7 +73,7 @@ Status bar updated to show: `^C=Copy | ^X=Move | ^D=Delete | ^R=Remotes`
 - This matches typical file manager behavior (local on left)
 
 **Files Changed:**
-- `config/app_config.ini` (lines 3-5)
+- `config/rclone-commander.ini` (lines 3-5)
 
 ### 5. Remote Listing Debug Support ✓
 
@@ -154,6 +154,6 @@ action_copy: Aborting due to failure
 ## Files Modified Summary
 
 - `src/rclonecommander/main.py` - Major changes
-- `config/app_config.ini` - Key bindings and defaults
+- `config/rclone-commander.ini` - Key bindings and defaults
 - `CLAUDE.md` - Documentation updates
 - `LATEST_FIXES.md` - This file
