@@ -13,26 +13,23 @@ if [ ! -d "$VENV_DIR" ]; then
     python3 -m venv "$VENV_DIR"
 fi
 
-# Activate venv
-echo "Activating virtual environment..."
-source "$VENV_DIR/bin/activate"
+# Use venv's python and pip directly (more reliable than activation)
+VENV_PYTHON="$VENV_DIR/bin/python3"
+VENV_PIP="$VENV_DIR/bin/pip3"
 
 # Install/upgrade requirements
 echo "Installing requirements..."
-pip install -q -r requirements.txt
+"$VENV_PIP" install -q -r requirements.txt
 
 # If a remote argument is provided, update the config
 if [ -n "$1" ]; then
     echo "Setting default remote to: $1"
-    if [ -f "config/app_config.ini" ]; then
+    if [ -f "config/rclone-commander.ini" ]; then
         # Update the config file with the specified remote
-        sed -i.bak "s/^default_left_remote = .*/default_left_remote = $1/" config/app_config.ini
+        sed -i.bak "s/^default_left_remote = .*/default_left_remote = $1/" config/rclone-commander.ini
     fi
 fi
 
 # Run the application
 echo "Starting Rclone Commander..."
-python3 -m src.rclone_commander.main
-
-# Deactivate venv on exit
-deactivate
+"$VENV_PYTHON" -m src.rclone_commander.main

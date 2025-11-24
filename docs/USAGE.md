@@ -53,7 +53,7 @@
 
 ## Configuration
 
-All settings are configurable via `config/app_config.ini`:
+All settings are configurable via `config/rclone-commander.ini`:
 - Default remotes for left and right panels
 - Key bindings
 - Display options (colors, borders, etc.)

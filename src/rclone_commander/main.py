@@ -47,14 +47,14 @@ def setup_debug_logging(enabled: bool) -> None:
 
     if debug_enabled:
         logging.basicConfig(
-            filename='rclone-cmd_debug.log',
+            filename='rclone-commander_debug.log',
             level=logging.DEBUG,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             force=True  # Reconfigure if already configured
         )
         logger.setLevel(logging.DEBUG)
         logger.info("=" * 80)
-        logger.info("rclone-cmd DEBUG MODE ENABLED")
+        logger.info("rclone-commander DEBUG MODE ENABLED")
         logger.info(f"  Enabled by: {'environment variable' if debug_env else 'config file'}")
         logger.info("=" * 80)
     else:
@@ -862,6 +862,84 @@ class ConfirmationModal(ModalScreen[bool]):
         self.dismiss(False)
 
 
+class LocalRemoteMissingModal(ModalScreen[bool]):
+    """Modal screen for prompting to add [local] remote."""
+
+    CSS = """
+    LocalRemoteMissingModal {
+        align: center middle;
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    #local-remote-dialog {
+        width: 70;
+        height: auto;
+        border: thick $primary;
+        background: $surface;
+        padding: 2 4;
+    }
+
+    #local-remote-title {
+        width: 100%;
+        content-align: center middle;
+        text-style: bold;
+        color: $accent;
+        margin-bottom: 1;
+    }
+
+    #local-remote-message {
+        width: 100%;
+        content-align: center middle;
+        margin-bottom: 2;
+    }
+
+    #local-remote-buttons {
+        width: 100%;
+        height: auto;
+        align: center middle;
+        margin-top: 1;
+    }
+
+    #local-remote-buttons Button {
+        margin: 0 1;
+    }
+    """
+
+    BINDINGS = [
+        Binding("escape", "cancel", "No"),
+        Binding("n", "cancel", "No"),
+        Binding("y", "confirm", "Yes"),
+    ]
+
+    def compose(self) -> ComposeResult:
+        """Compose the modal dialog."""
+        with Container(id="local-remote-dialog"):
+            yield Static("Local Remote Setup", id="local-remote-title")
+            yield Static(
+                "In order to be able to browse the local filesystem a [local] rclone entry is necessary.\n\n"
+                "Do you want me to add it for you?",
+                id="local-remote-message"
+            )
+            with Horizontal(id="local-remote-buttons"):
+                yield Button("Yes", variant="primary", id="yes-button")
+                yield Button("No", variant="default", id="no-button")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button press."""
+        if event.button.id == "yes-button":
+            self.dismiss(True)
+        else:
+            self.dismiss(False)
+
+    def action_confirm(self) -> None:
+        """Confirm adding [local] remote."""
+        self.dismiss(True)
+
+    def action_cancel(self) -> None:
+        """Decline adding [local] remote."""
+        self.dismiss(False)
+
+
 class DirectorySizeModal(ModalScreen):
     """Modal screen for showing directory size information."""
 
@@ -1244,6 +1322,49 @@ class RcloneCommander(App):
         # Just set focus to the left panel
         if self.left_panel and self.left_panel.file_list:
             self.left_panel.file_list.focus()
+
+        # Check if [local] remote is missing and prompt user (first run only)
+        self.check_local_remote()
+
+    def check_local_remote(self) -> None:
+        """Check if [local] remote exists and prompt user to add it if missing.
+
+        This only happens on first run (when local_remote_prompted flag is false).
+        """
+        # Only prompt if we haven't asked before
+        if not self.app_config.local_remote_prompted:
+            # Check if [local] remote exists
+            if not config.has_local_remote(self.config_path):
+                # Show modal to ask user
+                async def handle_local_remote_response(add_local: Optional[bool]) -> None:
+                    """Handle user's response to add [local] remote."""
+                    if add_local:
+                        # User wants to add [local] remote
+                        success = config.add_local_remote(self.config_path)
+                        if success:
+                            # Reload remotes
+                            self.remotes = config.load_remotes(self.config_path)
+                            logger.debug("[local] remote successfully added to rclone.conf")
+                            self.notify("Local remote added successfully!", severity="information")
+
+                            # Refresh any panels using "local" remote
+                            if self.left_panel and self.left_panel.remote.lower() == "local":
+                                logger.debug("Refreshing left panel after [local] remote added")
+                                refresh_panel(self.left_panel, self.rclone_path, self.config_path, self.app_config.extra_rclone_flags)
+                            if self.right_panel and self.right_panel.remote.lower() == "local":
+                                logger.debug("Refreshing right panel after [local] remote added")
+                                refresh_panel(self.right_panel, self.rclone_path, self.config_path, self.app_config.extra_rclone_flags)
+                        else:
+                            logger.warning("Failed to add [local] remote")
+                            self.notify("Failed to add local remote. You may need to add it manually.", severity="warning")
+
+                    # Mark as prompted (whether user said yes or no)
+                    config.mark_local_remote_prompted()
+
+                self.push_screen(LocalRemoteMissingModal(), handle_local_remote_response)
+            else:
+                # [local] exists, but mark as prompted anyway to avoid future checks
+                config.mark_local_remote_prompted()
 
     def on_key(self, event) -> None:
         """Log all key presses for debugging."""

@@ -181,7 +181,7 @@ action_copy: END
    - Added key press debugging
    - Added operation logging
 
-3. **config/app_config.ini**
+3. **config/rclone-commander.ini**
    - Added Ctrl+ key bindings
    - Set default panels (left=remote, right=local)
 

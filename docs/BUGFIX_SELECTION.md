@@ -76,4 +76,4 @@ Added comprehensive debug logging to help diagnose similar issues:
 - Logs every entry added with its row position and index
 - Logs selection operations with before/after states
 - Logs cursor position and offset calculations
-- Can be enabled via `config/app_config.ini` or `RCLONE_DEBUG` environment variable
+- Can be enabled via `config/rclone-commander.ini` or `RCLONE_DEBUG` environment variable

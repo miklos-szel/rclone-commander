@@ -6,7 +6,7 @@ There are two ways to enable debug mode:
 
 ### Method 1: Config File (Persistent)
 
-Edit `config/app_config.ini` and set:
+Edit `config/rclone-commander.ini` and set:
 
 ```ini
 [General]

@@ -1,5 +1,9 @@
 # rclone-commander
 
+<p align="center">
+  <img src="docs/img/rclone_commander_1.png" alt="rclone-commander screenshot" />
+</p>
+
 A dual-pane TUI (Text User Interface) file manager for rclone.
 
 ## Features
@@ -16,71 +20,18 @@ A dual-pane TUI (Text User Interface) file manager for rclone.
 - **Remote support** - Works with all rclone remotes
 - **Local filesystem support** - Unified local/remote access via rclone
 
-## Project Structure
-
-```
-rclone-commander/
-├── config/
-│   └── app_config.ini       # Application configuration
-├── src/
-│   └── rclone_commander/
-│       ├── __init__.py
-│       ├── main.py          # Main application
-│       ├── config.py        # Configuration management
-│       ├── rclone_wrapper.py # Rclone command wrappers
-│       └── progress_parser.py # Progress parsing
-├── docs/                     # Documentation
-├── rclone-commander.py      # Entry point
-├── run.sh                   # Convenience wrapper script
-├── requirements.txt         # Python dependencies
-├── rclone.conf              # Rclone remotes configuration
-└── README.md
-```
-
 ## Installation
 
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd rclone-commander
+prerequisities:
+- rclone installed and setup
+
 ```
-
-2. Ensure rclone is installed:
-```bash
-which rclone
+pip install rclone-commander
 ```
-
-3. The `run.sh` script will automatically set up a virtual environment and install dependencies.
-
-## Usage
-
-### Quick Start
-
-```bash
-# Run with default remote from config
-./run.sh
-
-# Run and set specific remote
-./run.sh rclonecommander
-
-# With custom rclone config
-export RCLONE_CONFIG=/path/to/rclone.conf
-./run.sh
+or 
 ```
-
-### Manual Run
-
-```bash
-# Set up virtual environment
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Run the application
-python3 rclone-commander.py
-
-# Or run as module
-python3 -m src.rclone_commander.main
+apt/brew/yum install pipx
+pipx install rclone-commander
 ```
 
 ## Configuration
@@ -88,17 +39,7 @@ python3 -m src.rclone_commander.main
 rclone-commander includes a default configuration file bundled with the package. You can customize settings by creating your own config file.
 
 **Config file locations** (in priority order):
-1. `~/.config/rclone-cmd/app_config.ini` - User-specific config (recommended for customization)
-2. `<package>/config/app_config.ini` - Default config bundled with installation
-3. `config/app_config.ini` - Legacy location (backwards compatibility)
-
-To customize settings, copy the default config to your user directory:
-```bash
-mkdir -p ~/.config/rclone-cmd/
-cp <package-location>/config/app_config.ini ~/.config/rclone-cmd/
-# Edit with your preferred editor
-nano ~/.config/rclone-cmd/app_config.ini
-```
+1. `~/.config/rclone-commander/rclone-commander.ini` - User-specific config (recommended for customization)
 
 ### General Settings
 
@@ -114,6 +55,8 @@ local_default_path =
 app_title = Rclone Commander
 # Extra rclone flags for all operations
 extra_rclone_flags = --transfers 6 --checkers 6
+# Internal flag: whether user has been prompted about adding [local] remote (do not modify)
+local_remote_prompted = false
 ```
 
 **Default Panel Behavior:**
@@ -171,33 +114,79 @@ refresh_panel = ctrl+r
 show_dir_size = ctrl+i
 ```
 
-## Keyboard Shortcuts
+## Navigation & Key Bindings
 
-Default key bindings (customizable in config):
+### Navigation Features
 
-### Navigation
-- **↑/↓ Arrow Keys** - Move cursor one item at a time
-- **←/→ Arrow Keys** - Fast scroll (10 items at a time)
-- **Enter** - Open directory or go to parent (..)
-- **Tab** - Switch between left and right panel
-- **Space/Insert** - Toggle file/directory selection
-- **Mouse Click** - Navigate to clicked item
+| Feature | Key/Action | Description |
+|---------|-----------|-------------|
+| **Cursor Movement** | Up/Down arrows | Move cursor one item at a time |
+| **Fast Scroll** | Left/Right arrows | Scroll 1/2 screen at a time |
+| **Open Directory** | Enter or Mouse click | Navigate into directories or open files |
+| **Parent Directory** | Enter on ".." | Go to parent directory (cursor positions on previous directory) |
+| **Panel Switch** | Tab | Switch focus between left and right panels |
+| **File Selection** | Space or Insert | Toggle selection with inverted colors, auto-advance cursor |
+| **Multi-Select** | Space/Insert (multiple) | Select multiple files before Copy/Move/Delete operations |
+| **Root Navigation** | Enter on "/" | Local filesystem can navigate from root to browse entire system |
+| **".." Entry** | Automatic | Always shown at top when not at root (hidden at "/" for local) |
 
-### File Operations
-- **F5** - Copy selected items to other panel (with progress)
-- **F6** - Move selected items to other panel (with progress)
-- **F7** - Create new directory
-- **F8/Delete** - Delete selected items (with progress)
-- **F10** - Show available remotes and switch
-- **ESC** - Cancel ongoing operation
+### Selection Visual Indicators
 
-### Panel Operations
-- **Ctrl+U** - Swap panels (exchange left/right contents)
-- **Ctrl+R** - Refresh current panel
-- **Ctrl+I** - Show directory size
+| Item Type | Visual Style | Description |
+|-----------|-------------|-------------|
+| **Selected Directory** | Black text on blue background | Inverted colors for visibility |
+| **Selected File** | Black text on white background | Inverted colors for visibility |
+| **Filename Display** | Full filename visible | No marker characters that cut off filenames |
+| **Auto-Clear** | After copy/move | Selections automatically cleared after successful operations |
 
-### Application
-- **Q** - Quit application
+### File Size Display
+
+| Property | Value | Description |
+|----------|-------|-------------|
+| **Column Width** | 15 characters | Fixed width, right-aligned |
+| **Content Alignment** | Left-aligned | File sizes displayed left-aligned within column |
+| **Position** | Right edge of pane | Always visible and consistently positioned |
+| **Format** | Human-readable | B, KB, MB, GB, TB, PB |
+
+### Key Bindings
+
+#### Function Keys (Primary Operations)
+
+| Key | Operation | Description |
+|-----|-----------|-------------|
+| **F5** | Copy | Copy selected files to opposite panel (with progress bar) |
+| **F6** | Move | Move selected files to opposite panel (with progress bar) |
+| **F7** | Make Directory | Create new directory (cursor positions on created directory) |
+| **F8** | Delete | Delete selected files (with progress bar) |
+| **F10** | Select Remote | Show remote selection dialog (change current panel's remote) |
+| **ESC** | Cancel | Cancel ongoing operation |
+
+#### Navigation Keys
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| **Up/Down** | Cursor movement | Move cursor one item |
+| **Left/Right** | Fast scroll | Scroll 1/2 screen at a time |
+| **Enter** | Navigate | Open directory or navigate to parent (..) |
+| **Tab** | Switch panel | Switch between left/right panels |
+| **Space/Insert** | Toggle selection | Toggle file selection with inverted colors |
+| **Mouse Click** | Navigate | Click on any row to navigate (same as Enter) |
+
+#### Panel Operations
+
+| Key | Operation | Description |
+|-----|-----------|-------------|
+| **Ctrl+U** | Swap Panels | Exchange left and right panel contents |
+| **Ctrl+R** | Refresh Panel | Refresh current panel listing |
+| **Ctrl+I** | Directory Size | Show size information for selected directory |
+
+#### Application Control
+
+| Key | Action | Description |
+|-----|--------|-------------|
+| **Q** | Quit | Exit application |
+
+> **Note:** All key bindings are customizable in the `[KeyBindings]` section of `rclone-commander.ini`
 
 ## Rclone Configuration
 
@@ -262,51 +251,50 @@ Configure in `~/.config/rclone/rclone.conf`:
 type = local
 ```
 
-By default, the local remote starts at your home directory. To start at the filesystem root (/) or a custom directory, set `local_default_path` in `config/app_config.ini`.
+By default, the local remote starts at your home directory. To start at the filesystem root (/) or a custom directory, set `local_default_path` in `config/rclone-commander.ini`.
 
 ## Environment Variables
 
 - `RCLONE_CONFIG` - Path to rclone configuration file
 - `RCLONE_PATH` - Path to rclone executable (default: `rclone`)
 
-## Development
-
-### Code Style
-
-The project uses functional programming style with minimal OOP. Textual framework requires some class usage for UI widgets, but business logic is implemented functionally.
-
-## Troubleshooting
-
-### Empty Panels
-
-If both panels show empty:
-1. Check that your rclone.conf has valid remotes configured
-2. Ensure the remote name in config/app_config.ini matches your rclone.conf
-3. Try switching to "local" remote with F10
-
-### Permission Errors
-
-If you see permission errors when listing directories:
-- Check file/directory permissions
-- Ensure rclone remote credentials are correct
-
-### Module Import Errors
-
-If you see import errors:
-- Use the `run.sh` script which handles paths correctly
-- Ensure all files are in the correct directory structure
-
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
-## Contributing
+## Changelog
 
-Contributions are welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+### Version 0.1.3 (2025-11-24)
+- Rename app_config.ini to rclone-commander.ini
+- Offer to add the [local] section to the rclone.conf upon the first run
+
+### Version 0.1.2
+- Add Makefile for build automation with venv support
+- Enhance .gitignore with comprehensive build artifact coverage
+- All build commands use isolated virtual environment
+
+### Version 0.1.1
+- Restructure config to be bundled with package
+- Config search priority: user config → package config → legacy
+- Change license from MIT to GPLv3
+- Add GPLv3 headers to all source files
+- Add configurable `local_default_path` option
+- Clear selections after successful copy/move operations
+- Improve file size column (15-char width, left-aligned)
+- Enable full filesystem browsing from root (/) for local remote
+- Proper root directory handling (hide ".." at "/")
+- Update all offset calculations for root navigation
+- Config ships with pip install (no manual setup needed)
+
+### Version 0.1.0
+- Initial release
+- Dual-pane file browser with rclone integration
+- Local and remote filesystem support
+- Multi-file selection with visual feedback
+- Copy/Move/Delete with real-time progress tracking
+- Parallel file transfers (up to 6 files simultaneously)
+- Mouse support for navigation
+- Configuration file support
 
 ## Credits
 

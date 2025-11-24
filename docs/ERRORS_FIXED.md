@@ -21,7 +21,7 @@ All operations now have comprehensive debug logging showing:
 - Full paths being used
 
 **Files Changed:**
-- `config/app_config.ini` - Updated key bindings
+- `config/rclone-commander.ini` - Updated key bindings
 - `src/rclonecommander/main.py` - Added debug logging to all operations
 
 ### 2. ✓ Remote Listing doesn't work (only 1 remote)
@@ -68,7 +68,7 @@ All operations now have comprehensive debug logging showing:
 
 **Files Changed:**
 - `src/rclonecommander/main.py` (lines 449-462) - Fixed panel initialization logic
-- `config/app_config.ini` - Set left=empty, right=local
+- `config/rclone-commander.ini` - Set left=empty, right=local
 
 ### 4. ✓ Selection cuts off last character / Use inverted colors instead of triangle
 
@@ -99,7 +99,7 @@ All operations now have comprehensive debug logging showing:
    - Changed selection display to inverted colors (lines 257-280)
    - Added debug logging to all operations
 
-2. **config/app_config.ini**
+2. **config/rclone-commander.ini**
    - Changed key bindings to add Ctrl+ alternatives
    - Set default_left_remote = empty
    - Set default_right_remote = local

@@ -19,7 +19,7 @@ The application is **fully functional**! Files are now displaying correctly usin
 - Multi-select (Space/Insert)
 - Copy/Move/Delete (F5/F6/F8)
 - Directory navigation with arrow keys
-- Fully configurable via `config/app_config.ini`
+- Fully configurable via `config/rclone-commander.ini`
 
 ## Recent Fix
 

@@ -23,13 +23,13 @@ self.entries = dirs + files  # Now matches display order
 **Problem:** Debug mode could only be enabled via environment variable, not persisted in config.
 
 **Solution:** Added `debug` option to configuration system:
-- Added to `config/app_config.ini` under [General]
+- Added to `config/rclone-commander.ini` under [General]
 - Added to `AppConfig` class in `src/rclonecommander/config.py`
 - Added `setup_debug_logging()` function in `src/rclonecommander/main.py`
 - Environment variable `RCLONE_DEBUG` still works and overrides config file
 
 **Files Changed:**
-- `config/app_config.ini` (added `debug = false`)
+- `config/rclone-commander.ini` (added `debug = false`)
 - `src/rclonecommander/config.py` (added debug field and loading)
 - `src/rclonecommander/main.py` (setup_debug_logging function)
 
@@ -60,7 +60,7 @@ Comprehensive debug logging now tracks:
 - All display refresh operations
 
 Enable debug mode:
-- Config: `debug = true` in `config/app_config.ini`
+- Config: `debug = true` in `config/rclone-commander.ini`
 - Environment: `export RCLONE_DEBUG=1`
 - Log file: `rclonecommander_debug.log`
 
